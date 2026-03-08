@@ -1,6 +1,6 @@
 # aiocentriconnect
 
-![Continuous Integration](https://github.com/gresrun/aiocentriconnect/workflows/Continuous%20Integration/badge.svg?branch=master)
+![Continuous Integration](https://github.com/gresrun/aiocentriconnect/workflows/Continuous%20Integration/badge.svg?branch=main)
 
 Asynchronous Python client for the [CentriConnect/MyPropane](https://centriconnect.com/) API.
 
