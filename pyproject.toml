@@ -1,0 +1,34 @@
+[project]
+name = "aiocentriconnect"
+dynamic = ["version"]
+authors = [
+  { name="Greg Haines", email="gresrun@gmail.com" },
+]
+description="Asynchronous Python client for CentriConnect/MyPropane API"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.14"
+keywords=["centriconnect", "mypropane", "propane", "api"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Home Automation",
+    "Typing :: Typed",
+]
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/gresrun/aiocentriconnect"
+Repository = "https://github.com/gresrun/aiocentriconnect.git"
+Issues = "https://github.com/gresrun/aiocentriconnect/issues"
+Download = "https://github.com/gresrun/aiocentriconnect/releases/latest"
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "aiocentriconnect.__version__"}

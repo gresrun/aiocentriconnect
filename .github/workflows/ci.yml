@@ -1,0 +1,30 @@
+name: Continuous Integration
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v6
+
+    - name: Install Python 
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+        cache: 'pip'
+ 
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run Tests
+      run: pytest
