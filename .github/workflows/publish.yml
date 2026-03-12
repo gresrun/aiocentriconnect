@@ -80,7 +80,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: v${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
           files: dist/*
           draft: false
           prerelease: false
+          make_latest: true
