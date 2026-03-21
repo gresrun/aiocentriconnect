@@ -8,7 +8,7 @@ class CentriConnectError(Exception):
 class CentriConnectDecodeError(CentriConnectError):
     """CentriConnect exception thrown when decoding a response fails."""
 
-    def __init__(self, message, raw_body):
+    def __init__(self, message: str, raw_body: str):
         """Init Decode error."""
         super().__init__(message)
         self.raw_body = raw_body
@@ -20,6 +20,14 @@ class CentriConnectDecodeError(CentriConnectError):
 
 class CentriConnectEmptyResponseError(CentriConnectError):
     """CentriConnect empty API response exception."""
+
+
+class CentriConnectNotFoundError(CentriConnectError):
+    """CentriConnect device not found exception."""
+
+
+class CentriConnectTooManyRequestsError(CentriConnectError):
+    """CentriConnect too many requests exception."""
 
 
 class CentriConnectConnectionError(CentriConnectError):

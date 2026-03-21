@@ -13,7 +13,11 @@ from .exceptions import (
     CentriConnectConnectionError,
     CentriConnectConnectionTimeoutError,
     CentriConnectDecodeError,
+    CentriConnectEmptyResponseError,
+    CentriConnectNotFoundError,
+    CentriConnectTooManyRequestsError,
 )
+from .types import TankDict
 
 
 class API:
@@ -38,25 +42,23 @@ class API:
         (CentriConnectConnectionTimeoutError, CentriConnectConnectionError),
         max_tries=3,
     )
-    async def async_request(self) -> dict:
+    async def async_request(self) -> TankDict:
         """Make an asynchronous request to the CentriConnect/MyPropane API.
-        Args:
-            user_id: The ID of the user for which to fetch data
-            device_id: The ID of the device for which to fetch data
-            device_auth: The device authentication code
-
         Raises:
             CentriConnectConnectionTimeoutError: The connection timed out
             CentriConnectConnectionError: Any communication error
+            CentriConnectNotFoundError: The requested device was not found
+            CentriConnectTooManyRequestsError: Too many requests were made to the API
+            CentriConnectDecodeError: The API response could not be decoded
+            CentriConnectEmptyResponseError: The API response did not contain any data
 
         Returns:
-            Data for the given endpoint
+            Typed dictionary containing the tank data
         """
         try:
             async with async_timeout.timeout(self.timeout):
                 async with self.session.get(self.build_url()) as response:
-                    response.raise_for_status()
-                    return await self._decode_response(response)
+                    return await self._handle_response(response)
         except asyncio.TimeoutError as ex:
             raise CentriConnectConnectionTimeoutError(
                 "Timeout while connecting to CentriConnect API"
@@ -74,12 +76,33 @@ class API:
             + f"?device_auth={self.device_auth}"
         )
 
-    async def _decode_response(self, response: aiohttp.ClientResponse) -> dict:
-        """Decode JSON response."""
+    async def _handle_response(self, response: aiohttp.ClientResponse) -> TankDict:
+        """Handle the API response."""
+        if response.status == 404:
+            raise CentriConnectNotFoundError()
+        if response.status == 429:
+            raise CentriConnectTooManyRequestsError()
+        if not response.ok:
+            raise CentriConnectConnectionError(
+                f"Received unexpected status code {response.status} from CentriConnect API"
+            )
         raw_body = await response.text()
         try:
             json_body = json.loads(raw_body)
-            if (json_body is None) or (self.device_id not in json_body):
+            if json_body is None:
+                raise CentriConnectEmptyResponseError(
+                    "CentriConnect API response did not contain expected data", raw_body
+                )
+            if "error" in json_body:
+                error_msg = json_body["error"]
+                if error_msg == "NotFound":
+                    raise CentriConnectNotFoundError()
+                else:
+                    raise CentriConnectDecodeError(
+                        "CentriConnect API response did not contain expected data",
+                        raw_body,
+                    )
+            if self.device_id not in json_body:
                 raise CentriConnectDecodeError(
                     "CentriConnect API response did not contain expected data",
                     raw_body,

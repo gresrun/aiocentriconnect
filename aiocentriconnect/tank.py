@@ -2,11 +2,13 @@
 
 from datetime import datetime
 
+from aiocentriconnect.types import TankDict
+
 
 class Tank:
     """Object holding information about a CentriConnect/MyPropane tank."""
 
-    def __init__(self, raw_data: dict):
+    def __init__(self, raw_data: TankDict):
         self.raw_data = raw_data
 
     @property
@@ -89,11 +91,11 @@ class Tank:
         return self.raw_data["TankSizeUnit"]
 
     @property
-    def hardware_version(self) -> int:
+    def hardware_version(self) -> str:
         """Hardware version"""
         return self.raw_data["VersionHW"]
 
     @property
-    def lte_version(self) -> int:
+    def lte_version(self) -> str:
         """LTE version"""
         return self.raw_data["VersionLTE"]

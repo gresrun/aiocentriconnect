@@ -4,6 +4,7 @@
 import asyncio
 
 import aiohttp
+from aiohttp.web import Response
 import pytest
 
 from aiocentriconnect import CentriConnect
@@ -11,7 +12,10 @@ from aiocentriconnect.exceptions import (
     CentriConnectConnectionError,
     CentriConnectConnectionTimeoutError,
     CentriConnectDecodeError,
+    CentriConnectNotFoundError,
+    CentriConnectTooManyRequestsError,
 )
+from aresponses.main import ResponsesMockServer  # type: ignore
 
 fake_user_id = "12345678-9012-3456-7a89-b012345cde6f"
 fake_device_id = "123a4b5c-678d-9e0f-a123-4b567c8d901e"
@@ -48,7 +52,7 @@ api_path = (
 
 
 @pytest.mark.asyncio
-async def test_tank_data_request(aresponses):
+async def test_tank_data_request(aresponses: ResponsesMockServer):
     add_valid_tank_data_response(aresponses)
 
     async with aiohttp.ClientSession() as session:
@@ -78,7 +82,7 @@ async def test_tank_data_request(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_internal_session(aresponses):
+async def test_internal_session(aresponses: ResponsesMockServer):
     add_valid_tank_data_response(aresponses)
 
     async with CentriConnect(
@@ -91,18 +95,18 @@ async def test_internal_session(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_timeout(aresponses):
+async def test_timeout(aresponses: ResponsesMockServer):
     async def response_handler(_):
         await asyncio.sleep(0.2)
         return get_valid_tank_data_response(aresponses)
 
     # Backoff will try 3 times
     for _ in range(3):
-        aresponses.add(
-            api_host,
-            api_path,
-            "GET",
-            response_handler,
+        aresponses.add(  # type: ignore
+            api_host,  # type: ignore
+            api_path,  # type: ignore
+            "GET",  # type: ignore
+            response_handler,  # type: ignore
             match_querystring=True,
         )
 
@@ -117,14 +121,14 @@ async def test_timeout(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_error_response(aresponses):
-    aresponses.add(
-        api_host,
-        api_path,
-        "GET",
+async def test_weird_error_response(aresponses: ResponsesMockServer):
+    aresponses.add(  # type: ignore
+        api_host,  # type: ignore
+        api_path,  # type: ignore
+        "GET",  # type: ignore
         aresponses.Response(
             status=500, headers={"Content-Type": "text/plain"}, text="Error"
-        ),
+        ),  # type: ignore
         match_querystring=True,
     )
 
@@ -137,7 +141,51 @@ async def test_error_response(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_can_get_raw_response_from_exception(aresponses):
+async def test_not_found_error_response(aresponses: ResponsesMockServer):
+    aresponses.add(  # type: ignore
+        api_host,  # type: ignore
+        api_path,  # type: ignore
+        "GET",  # type: ignore
+        aresponses.Response(
+            status=404,
+            headers={"Content-Type": "text/plain"},
+            text='{"error": "NotFound", "message": "Device does not exist."}',
+        ),  # type: ignore
+        match_querystring=True,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        centriconnect = CentriConnect(
+            fake_user_id, fake_device_id, fake_device_auth, session=session
+        )
+        with pytest.raises(CentriConnectNotFoundError):
+            assert await centriconnect.async_get_tank_data()
+
+
+@pytest.mark.asyncio
+async def test_not_too_many_requests_response(aresponses: ResponsesMockServer):
+    aresponses.add(  # type: ignore
+        api_host,  # type: ignore
+        api_path,  # type: ignore
+        "GET",  # type: ignore
+        aresponses.Response(
+            status=429,
+            headers={"Content-Type": "text/plain"},
+            text="",
+        ),  # type: ignore
+        match_querystring=True,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        centriconnect = CentriConnect(
+            fake_user_id, fake_device_id, fake_device_auth, session=session
+        )
+        with pytest.raises(CentriConnectTooManyRequestsError):
+            assert await centriconnect.async_get_tank_data()
+
+
+@pytest.mark.asyncio
+async def test_can_get_raw_response_from_exception(aresponses: ResponsesMockServer):
     malformed_json = """
     {
         "123a4b5c-678d-9e0f-a123-4b567c8d901e": {
@@ -145,15 +193,15 @@ async def test_can_get_raw_response_from_exception(aresponses):
             "Altitude": 123.456,
             "BatteryVolts": 4.19,
     """
-    aresponses.add(
-        api_host,
-        api_path,
-        "GET",
+    aresponses.add(  # type: ignore
+        api_host,  # type: ignore
+        api_path,  # type: ignore
+        "GET",  # type: ignore
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
             text=malformed_json,
-        ),
+        ),  # type: ignore
         match_querystring=True,
     )
 
@@ -169,17 +217,19 @@ async def test_can_get_raw_response_from_exception(aresponses):
     aresponses.assert_plan_strictly_followed()
 
 
-def add_valid_tank_data_response(aresponses):
-    aresponses.add(
-        api_host,
-        api_path,
-        "GET",
-        get_valid_tank_data_response(aresponses),
+def add_valid_tank_data_response(aresponses: ResponsesMockServer) -> None:
+    aresponses.add(  # type: ignore
+        api_host,  # type: ignore
+        api_path,  # type: ignore
+        "GET",  # type: ignore
+        get_valid_tank_data_response(aresponses),  # type: ignore
         match_querystring=True,
     )
 
 
-def get_valid_tank_data_response(aresponses):
+def get_valid_tank_data_response(
+    aresponses: ResponsesMockServer,
+) -> Response:
     return aresponses.Response(
         status=200,
         headers={"Content-Type": "application/json"},
