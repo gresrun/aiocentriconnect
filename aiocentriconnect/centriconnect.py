@@ -45,7 +45,7 @@ class Tank:
         self.raw_data = raw_data
 
     @property
-    def alert_status(self) -> float:
+    def alert_status(self) -> str:
         """Alert status"""
         return self.raw_data["AlertStatus"]
 
@@ -119,7 +119,7 @@ class Tank:
         return self.raw_data["TankSize"]
 
     @property
-    def tank_size_unit(self) -> int:
+    def tank_size_unit(self) -> str:
         """Tank size unit"""
         return self.raw_data["TankSizeUnit"]
 
