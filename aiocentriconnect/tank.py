@@ -22,6 +22,13 @@ class Tank:
         return self.raw_data["Altitude"]
 
     @property
+    def battery_level(self) -> float:
+        """Battery level"""
+        # The battery level is estimated based on the battery voltage,
+        # with 3.5V or below being 0% and 4.05V or above being 100%.
+        return min(1.0, max(((self.battery_voltage - 3.5) / 0.5), 0.0)) * 100
+
+    @property
     def battery_voltage(self) -> float:
         """Battery voltage"""
         return self.raw_data["BatteryVolts"]
@@ -59,6 +66,18 @@ class Tank:
         return self.raw_data["Longitude"]
 
     @property
+    def lte_signal_level(self) -> float:
+        """LTE signal level"""
+        # The LTE signal level is estimated based on the LTE signal strength,
+        # with -140 dBm or below being 0% and -70 dBm or above being 100%.
+        return min(1.0, max(((self.lte_signal_strength + 140.0) / 70.0), 0.0)) * 100
+
+    @property
+    def lte_signal_strength(self) -> float:
+        """LTE signal strength"""
+        return self.raw_data["SignalQualLTE"]
+
+    @property
     def next_post_time(self) -> datetime:
         """Next post time"""
         string_time = self.raw_data["NextPostTimeIso"]
@@ -66,9 +85,11 @@ class Tank:
         return datetime.fromisoformat(date)
 
     @property
-    def lte_signal_strength(self) -> float:
-        """LTE signal strength"""
-        return self.raw_data["SignalQualLTE"]
+    def solar_level(self) -> float:
+        """Solar level"""
+        # The solar level is estimated based on the solar voltage,
+        # with 0V being 0% and 2.6V or above being 100%.
+        return min(1.0, max((self.solar_voltage / 2.6), 0.0)) * 100
 
     @property
     def solar_voltage(self) -> float:
@@ -79,6 +100,11 @@ class Tank:
     def tank_level(self) -> float:
         """Tank level"""
         return self.raw_data["TankLevel"]
+
+    @property
+    def tank_remaining_volume(self) -> float:
+        """Tank remaining volume"""
+        return self.tank_level * 0.01 * self.tank_size
 
     @property
     def tank_size(self) -> int:

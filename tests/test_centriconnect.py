@@ -62,6 +62,7 @@ async def test_tank_data_request(aresponses: ResponsesMockServer):
         tank_data = await centriconnect.async_get_tank_data()
         assert tank_data.alert_status == "No Alert"
         assert tank_data.altitude == 123.456
+        assert tank_data.battery_level == 100.0
         assert tank_data.battery_voltage == 4.19
         assert tank_data.device_id == fake_device_id
         assert tank_data.device_name == "My Tank"
@@ -70,9 +71,12 @@ async def test_tank_data_request(aresponses: ResponsesMockServer):
         assert tank_data.longitude == -74.0060
         assert tank_data.last_post_time.isoformat() == "2026-02-27T22:00:31+00:00"
         assert tank_data.next_post_time.isoformat() == "2026-02-28T10:00:00+00:00"
+        assert tank_data.lte_signal_level == 47.14285714285714
         assert tank_data.lte_signal_strength == -107.0
+        assert tank_data.solar_level == 94.61538461538461
         assert tank_data.solar_voltage == 2.46
         assert tank_data.tank_level == 75.0
+        assert tank_data.tank_remaining_volume == 750.0
         assert tank_data.tank_size == 1000.0
         assert tank_data.tank_size_unit == "Gallons"
         assert tank_data.hardware_version == "4.1"

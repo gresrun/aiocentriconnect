@@ -6,7 +6,7 @@ from typing import TypedDict
 class TankDict(TypedDict):
     """Typed dictionary for a CentriConnect/MyPropane tank."""
 
-    AlertStatus: float
+    AlertStatus: str
     Altitude: float
     BatteryVolts: float
     DeviceID: str
@@ -20,6 +20,6 @@ class TankDict(TypedDict):
     SolarVolts: float
     TankLevel: float
     TankSize: int
-    TankSizeUnit: int
+    TankSizeUnit: str
     VersionHW: str
     VersionLTE: str
