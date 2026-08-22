@@ -3,7 +3,6 @@ aiohttp==3.13.3
 aiosignal==1.4.0
 aresponses==3.0.0
 astroid==4.0.4
-async-timeout==5.0.1
 attrs==25.4.0
 backoff==2.2.1
 black==26.3.0
