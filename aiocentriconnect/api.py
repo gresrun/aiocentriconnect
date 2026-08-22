@@ -6,7 +6,7 @@ import socket
 from json.decoder import JSONDecodeError
 
 import aiohttp
-import async_timeout
+import asyncio
 import backoff
 
 from .exceptions import (
@@ -56,7 +56,7 @@ class API:
             Typed dictionary containing the tank data
         """
         try:
-            async with async_timeout.timeout(self.timeout):
+            async with asyncio.timeout(self.timeout):
                 async with self.session.get(self.build_url()) as response:
                     return await self._handle_response(response)
         except asyncio.TimeoutError as ex:
