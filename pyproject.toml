@@ -7,6 +7,11 @@ authors = [
 description="Asynchronous Python client for CentriConnect/MyPropane API"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.14"
+dependencies = [
+    "aiohttp",
+    "async-timeout",
+    "backoff",
+]
 keywords=["centriconnect", "mypropane", "propane", "api"]
 classifiers = [
     "Development Status :: 4 - Beta",
